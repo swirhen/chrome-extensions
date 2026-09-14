@@ -1,5 +1,6 @@
 // フォルダパスの正規化（余分なスラッシュや階層移動記号を除去）
 function sanitizeFolder(folder) {
+    // 保存先はダウンロードフォルダからの相対パスとして扱う
     if (!folder) return '';
     return folder.trim().replace(/^\/+|\/+$/g, '').replace(/\.\.\//g, '');
 }
