@@ -74,6 +74,31 @@
             background-color: #a71d2a;
         }
 
+        button.secondary {
+            background-color: #6c757d;
+        }
+
+        button.secondary:hover {
+            background-color: #545b62;
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .settings-actions input[type="file"] {
+            display: none;
+        }
+
+        .help-text {
+            color: #666;
+            font-size: 13px;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -118,6 +143,9 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
             pointer-events: none;
             z-index: 9999;
+            max-width: min(600px, calc(100vw - 50px));
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
         .status.show {
@@ -201,6 +229,17 @@
             </div>
         </div>
         <input type="hidden" id="edit-ext-index" value="-1">
+    </div>
+
+    <!-- 設定のバックアップ -->
+    <div class="card">
+        <h2>3. 設定のバックアップ</h2>
+        <div class="settings-actions">
+            <button id="export-settings" type="button">設定をエクスポート</button>
+            <button id="import-settings" class="secondary" type="button">設定をインポート</button>
+            <input id="import-settings-file" type="file" accept="application/json,.json">
+        </div>
+        <p class="help-text">エクスポートしたJSONファイルから、URL別・拡張子別のルールを復元できます。</p>
     </div>
 
     <script src="options.js"></script>

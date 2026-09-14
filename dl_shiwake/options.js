@@ -12,6 +12,11 @@ const newExtFolderInput = document.getElementById('new-ext-folder');
 const addExtensionBtn = document.getElementById('add-extension-rule');
 const editExtIndexInput = document.getElementById('edit-ext-index');
 
+// UI Elements - Settings Backup
+const exportSettingsBtn = document.getElementById('export-settings');
+const importSettingsBtn = document.getElementById('import-settings');
+const importSettingsFileInput = document.getElementById('import-settings-file');
+
 // UI Elements - Notification
 const statusGeneralDiv = document.getElementById('status-general');
 
@@ -26,6 +31,9 @@ function init() {
     restoreOptions();
     addDomainBtn.addEventListener('click', addOrUpdateDomainRule);
     addExtensionBtn.addEventListener('click', addOrUpdateExtensionRule);
+    exportSettingsBtn.addEventListener('click', exportSettings);
+    importSettingsBtn.addEventListener('click', () => importSettingsFileInput.click());
+    importSettingsFileInput.addEventListener('change', importSettings);
 }
 
 if (document.readyState === 'loading') {
@@ -228,11 +236,88 @@ function saveAllSettings(callback) {
     });
 }
 
+// --- Settings Backup ---
+
+function exportSettings() {
+    const settings = {
+        format: 'dl-shiwake-settings',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        domainRules: currentSettings.domainRules,
+        extensionRules: currentSettings.extensionRules
+    };
+    const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `dl-shiwake-settings-${date}.json`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+    showStatus(statusGeneralDiv, `ダウンロードフォルダに保存しました。\nファイル名: ${filename}`);
+}
+
+function importSettings(event) {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const importedSettings = JSON.parse(reader.result);
+            if (!isValidSettingsFile(importedSettings)) {
+                throw new Error('設定ファイルの形式が正しくありません。');
+            }
+
+            if (!confirm('現在の設定をインポートした内容で置き換えますか？')) return;
+
+            currentSettings.domainRules = importedSettings.domainRules;
+            currentSettings.extensionRules = importedSettings.extensionRules;
+            editDomainIndexInput.value = '-1';
+            editExtIndexInput.value = '-1';
+            addDomainBtn.textContent = '追加';
+            addExtensionBtn.textContent = '追加';
+            newDomainInput.value = '';
+            newFolderInput.value = '';
+            newExtensionInput.value = '';
+            newExtFolderInput.value = '';
+
+            saveAllSettings(() => {
+                renderDomainRules();
+                renderExtensionRules();
+            });
+        } catch (error) {
+            alert(`設定をインポートできませんでした。\n${error.message}`);
+        }
+    };
+    reader.onerror = () => alert('設定ファイルを読み込めませんでした。');
+    reader.readAsText(file);
+}
+
+function isValidSettingsFile(settings) {
+    if (!settings || settings.format !== 'dl-shiwake-settings' || settings.version !== 1) {
+        return false;
+    }
+
+    return areValidRules(settings.domainRules, 'domain')
+        && areValidRules(settings.extensionRules, 'extension');
+}
+
+function areValidRules(rules, valueKey) {
+    return Array.isArray(rules) && rules.every((rule) => (
+        rule && typeof rule[valueKey] === 'string' && rule[valueKey].trim()
+        && typeof rule.folder === 'string' && rule.folder.trim()
+    ));
+}
+
 // トースト表示のアニメーション・タイマー制御
-function showStatus(element) {
+function showStatus(element, message = '設定を保存しました。') {
     const target = element || statusGeneralDiv;
     if (!target) return;
 
+    target.textContent = message;
     target.classList.add('show');
 
     if (target.dataset.timeoutId) {
