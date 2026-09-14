@@ -101,21 +101,36 @@
             flex: 1;
         }
 
+        /* 右上固定トースト通知のスタイル */
         .status {
-            margin-top: 10px;
-            color: green;
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background-color: #28a745;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             font-weight: bold;
+            font-size: 14px;
             opacity: 0;
-            transition: opacity 0.5s;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+            z-index: 9999;
         }
 
         .status.show {
             opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body>
+    <!-- 右上固定トースト通知 -->
+    <div id="status-general" class="status">設定を保存しました。</div>
+
     <h1>ダウンロード仕分けマン 設定</h1>
 
     <!-- URL別振り分け設定 -->
@@ -186,11 +201,6 @@
             </div>
         </div>
         <input type="hidden" id="edit-ext-index" value="-1">
-    </div>
-
-    <div style="margin-top: 20px;">
-        <button id="save-all">設定を保存</button>
-        <div id="status-general" class="status">設定を保存しました。</div>
     </div>
 
     <script src="options.js"></script>

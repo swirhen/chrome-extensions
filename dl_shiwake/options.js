@@ -12,8 +12,7 @@ const newExtFolderInput = document.getElementById('new-ext-folder');
 const addExtensionBtn = document.getElementById('add-extension-rule');
 const editExtIndexInput = document.getElementById('edit-ext-index');
 
-// UI Elements - Save
-const saveAllBtn = document.getElementById('save-all');
+// UI Elements - Notification
 const statusGeneralDiv = document.getElementById('status-general');
 
 // State (ルールのみ保持)
@@ -27,9 +26,6 @@ function init() {
     restoreOptions();
     addDomainBtn.addEventListener('click', addOrUpdateDomainRule);
     addExtensionBtn.addEventListener('click', addOrUpdateExtensionRule);
-    if (saveAllBtn) {
-        saveAllBtn.addEventListener('click', () => saveAllSettings());
-    }
 }
 
 if (document.readyState === 'loading') {
