@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ダウンロード仕分けマン 設定</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            margin-top: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.delete {
+            background-color: #dc3545;
+        }
+
+        button.delete:hover {
+            background-color: #a71d2a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .row-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .row-inputs>div {
+            flex: 1;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: green;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .status.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ダウンロード仕分けマン 設定</h1>
+
+    <!-- URL別振り分け設定 -->
+    <div class="card">
+        <h2>1. サイト別（URL）振り分け設定</h2>
+        <p>URL（または参照元URL）にキーワードが含まれる場合、指定フォルダに保存します。</p>
+
+        <table id="domain-list">
+            <thead>
+                <tr>
+                    <th>開いているURL（部分一致）</th>
+                    <th>保存フォルダ名 (例: Twitter)</th>
+                    <th style="width: 120px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JSで生成 -->
+            </tbody>
+        </table>
+
+        <div class="row-inputs">
+            <div>
+                <label>キーワード（カンマ区切り可）</label>
+                <input type="text" id="new-domain" placeholder="example.com, test.org">
+            </div>
+            <div>
+                <label>フォルダ名</label>
+                <input type="text" id="new-folder" placeholder="ExampleFolder">
+            </div>
+            <div>
+                <label>&nbsp;</label>
+                <button id="add-domain-rule">追加</button>
+            </div>
+        </div>
+        <input type="hidden" id="edit-domain-index" value="-1">
+    </div>
+
+    <!-- 拡張子別振り分け設定 -->
+    <div class="card">
+        <h2>2. 拡張子別振り分け設定</h2>
+        <p>サイト別ルールに該当しない場合、ファイルの拡張子に応じて指定フォルダに保存します。</p>
+
+        <table id="extension-list">
+            <thead>
+                <tr>
+                    <th>拡張子（完全一致）</th>
+                    <th>保存フォルダ名 (例: Images)</th>
+                    <th style="width: 120px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JSで生成 -->
+            </tbody>
+        </table>
+
+        <div class="row-inputs">
+            <div>
+                <label>拡張子（カンマ区切り可）</label>
+                <input type="text" id="new-extension" placeholder="png, jpg, jpeg">
+            </div>
+            <div>
+                <label>フォルダ名</label>
+                <input type="text" id="new-ext-folder" placeholder="Images">
+            </div>
+            <div>
+                <label>&nbsp;</label>
+                <button id="add-extension-rule">追加</button>
+            </div>
+        </div>
+        <input type="hidden" id="edit-ext-index" value="-1">
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button id="save-all">設定を保存</button>
+        <div id="status-general" class="status">設定を保存しました。</div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+
+</html>
