@@ -65,6 +65,7 @@ function renderDomainRules() {
         tdFolder.textContent = rule.folder;
 
         const tdAction = document.createElement('td');
+        tdAction.className = 'action-cell';
 
         const editBtn = document.createElement('button');
         editBtn.textContent = '編集';
@@ -150,6 +151,7 @@ function renderExtensionRules() {
         tdFolder.textContent = rule.folder;
 
         const tdAction = document.createElement('td');
+        tdAction.className = 'action-cell';
 
         const editBtn = document.createElement('button');
         editBtn.textContent = '編集';

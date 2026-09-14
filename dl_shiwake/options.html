@@ -116,6 +116,10 @@
             background-color: #f2f2f2;
         }
 
+        .action-cell {
+            white-space: nowrap;
+        }
+
         .row-inputs {
             display: flex;
             gap: 10px;
@@ -163,13 +167,13 @@
 
     <!-- URL別振り分け設定 -->
     <div class="card">
-        <h2>1. サイト別（URL）振り分け設定</h2>
+        <h2>サイト別（URL）振り分け設定</h2>
         <p>URL（または参照元URL）にキーワードが含まれる場合、指定フォルダに保存します。</p>
 
         <table id="domain-list">
             <thead>
                 <tr>
-                    <th>開いているURL（部分一致）</th>
+                    <th>URL（部分一致）</th>
                     <th>保存フォルダ名 (例: Twitter)</th>
                     <th style="width: 120px;">操作</th>
                 </tr>
@@ -198,7 +202,7 @@
 
     <!-- 拡張子別振り分け設定 -->
     <div class="card">
-        <h2>2. 拡張子別振り分け設定</h2>
+        <h2>拡張子別振り分け設定</h2>
         <p>サイト別ルールに該当しない場合、ファイルの拡張子に応じて指定フォルダに保存します。</p>
 
         <table id="extension-list">
@@ -233,13 +237,20 @@
 
     <!-- 設定のバックアップ -->
     <div class="card">
-        <h2>3. 設定のバックアップ</h2>
+        <h2>設定のバックアップ</h2>
         <div class="settings-actions">
             <button id="export-settings" type="button">設定をエクスポート</button>
             <button id="import-settings" class="secondary" type="button">設定をインポート</button>
             <input id="import-settings-file" type="file" accept="application/json,.json">
         </div>
         <p class="help-text">エクスポートしたJSONファイルから、URL別・拡張子別のルールを復元できます。</p>
+    </div>
+
+    <!-- ダウンロード先に関するヒント -->
+    <div class="card">
+        <h2>ダウンロード先をDownloads配下以外にしたい方へ</h2>
+        <p>Chromeの仕様上、ファイルのダウンロード先はDownloads配下以外には設定できません。</p>
+        <p>ヒントとして、シンボリックリンクをDownloads配下に作成すれば、Downloads配下以外のフォルダにも保存することができます。</p>
     </div>
 
     <script src="options.js"></script>
