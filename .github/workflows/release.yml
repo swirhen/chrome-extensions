@@ -1,0 +1,49 @@
+name: Release Chrome Extension
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read manifest version
+        id: version
+        shell: pwsh
+        run: |
+          $manifest = Get-Content .\dl_shiwake\manifest.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          "version=$($manifest.version)" >> $env:GITHUB_OUTPUT
+
+      - name: Check tag and manifest version
+        shell: pwsh
+        env:
+          MANIFEST_VERSION: ${{ steps.version.outputs.version }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          if ($env:TAG_NAME -ne "v$($env:MANIFEST_VERSION)") {
+            throw "Tag $env:TAG_NAME does not match manifest version $env:MANIFEST_VERSION"
+          }
+
+      - name: Create release ZIP
+        shell: pwsh
+        run: .\build-release.ps1
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: pwsh
+        run: |
+          gh release create "v$env:VERSION" `
+            "dl-shiwake-$env:VERSION.zip" `
+            --title "GitHub Actionsのテスト" `
+            --notes "GitHub Actionsのテスト"
