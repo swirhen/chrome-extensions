@@ -73,6 +73,14 @@ function applyState(isEnabled) {
 }
 
 function updateIcon(isEnabled) {
+    const iconSuffix = isEnabled ? '' : '_disabled';
+    chrome.action.setIcon({
+        path: {
+            16: `icons/icon_16${iconSuffix}.png`,
+            48: `icons/icon_48${iconSuffix}.png`,
+            128: `icons/icon_128${iconSuffix}.png`
+        }
+    });
     chrome.action.setBadgeText({ text: isEnabled ? "" : "OFF" });
     chrome.action.setBadgeBackgroundColor({ color: "#666666" });
 }
