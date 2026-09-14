@@ -22,6 +22,7 @@ if ([string]::IsNullOrWhiteSpace($manifest.version)) {
 $version = [string]$manifest.version
 $outputPath = Join-Path $repositoryRoot ("dl-shiwake-{0}.zip" -f $version)
 $stagingDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("dl-shiwake-release-{0}" -f ([guid]::NewGuid().ToString('N')))
+$existingArchives = Get-ChildItem -LiteralPath $repositoryRoot -Filter 'dl-shiwake-*.zip' -File
 
 $files = @(
     'manifest.json'
@@ -31,6 +32,10 @@ $files = @(
 )
 
 try {
+    foreach ($archive in $existingArchives) {
+        Remove-Item -LiteralPath $archive.FullName -Force
+    }
+
     New-Item -ItemType Directory -Path (Join-Path $stagingDirectory 'icons') -Force | Out-Null
 
     foreach ($file in $files) {
@@ -47,9 +52,6 @@ try {
     }
     Copy-Item -Path (Join-Path $iconDirectory '*') -Destination (Join-Path $stagingDirectory 'icons') -Force
 
-    if (Test-Path -LiteralPath $outputPath) {
-        Remove-Item -LiteralPath $outputPath -Force
-    }
     Compress-Archive -Path (Join-Path $stagingDirectory '*') -DestinationPath $outputPath -Force
 
     if (-not $NoVerify) {
