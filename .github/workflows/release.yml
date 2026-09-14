@@ -45,5 +45,5 @@ jobs:
         run: |
           gh release create "v$env:VERSION" `
             "dl-shiwake-$env:VERSION.zip" `
-            --title "GitHub Actionsのテスト" `
-            --notes "GitHub Actionsのテスト"
+            --title "ダウンロード先振り分け v$env:VERSION" `
+            --generate-notes
