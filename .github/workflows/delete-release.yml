@@ -1,0 +1,39 @@
+name: Delete GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 削除するタグ
+        required: true
+        default: v1.0.3
+      confirm:
+        description: 削除確認のため DELETE と入力
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  delete-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Confirm deletion
+        env:
+          CONFIRM: ${{ inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "DELETE" ]; then
+            echo "Confirmation failed."
+            exit 1
+          fi
+
+      - name: Delete release and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release delete "$TAG" \
+            --repo "${{ github.repository }}" \
+            --cleanup-tag \
+            --yes
