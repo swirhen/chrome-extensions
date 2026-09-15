@@ -18,11 +18,11 @@ Chrome Web Store [ダウンロード先振り分け](https://chromewebstore.goog
 
 Chrome Web Storeを利用せずにインストールする場合は、[Releases](https://github.com/swirhen/chrome-extensions/releases)から最新版のZIPファイルをダウンロードします。
 
-1. ZIPファイルを展開します。
+1. ZIPファイルを展開します。(展開の際、任意の名前でフォルダを作成してください)
 2. Chromeで `chrome://extensions` を開きます。
 3. 右上の「デベロッパーモード」を有効にします。
 4. 「パッケージ化されていない拡張機能を読み込む」を選択します。
-5. 展開した `dl_shiwake` フォルダを選択します。
+5. 1. で展開したフォルダを選択します。
 
 ## 使い方
 
