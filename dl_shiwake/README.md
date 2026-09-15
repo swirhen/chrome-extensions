@@ -12,7 +12,7 @@ Chromeでダウンロードしたファイルを、URLまたは拡張子のル�
 
 ### Chrome Web Storeからインストール
 
-Chrome Web Storeで公開後、こちらにリンクを追加します。
+Chrome Web Store [ダウンロード先振り分け](https://chromewebstore.google.com/detail/%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E5%85%88%E6%8C%AF%E3%82%8A%E5%88%86%E3%81%91/iglokmjaapadipghfmnjhlbobgeicbpa) からインストールできます。
 
 ### GitHub Releasesからインストール
 
