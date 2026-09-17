@@ -11,6 +11,10 @@ function findTargetFolder(item, settings) {
     const referrerStr = (item.referrer || '').toLowerCase();
     const filename = (item.filename || '').split(/[/\\]/).pop();
 
+    console.group(`[dl_shiwake] ダウンロード検出: ${filename}`);
+    console.log('URL      :', item.url || '(なし)');
+    console.log('Referrer :', item.referrer || '(なし)');
+
     // 1. URLルール（部分一致）
     const domainRules = Array.isArray(settings.domainRules) ? settings.domainRules : [];
     const domainRule = domainRules.find(rule => {
@@ -19,7 +23,13 @@ function findTargetFolder(item, settings) {
         return keywords.some(k => urlStr.includes(k) || referrerStr.includes(k));
     });
 
-    if (domainRule?.folder) return sanitizeFolder(domainRule.folder);
+    if (domainRule?.folder) {
+        const folder = sanitizeFolder(domainRule.folder);
+        console.log('マッチ   : URLルール', `キーワード="${domainRule.domain}"`);
+        console.log('保存先   :', folder);
+        console.groupEnd();
+        return folder;
+    }
 
     // 2. 拡張子ルール（完全一致）
     const extMatch = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
@@ -31,9 +41,17 @@ function findTargetFolder(item, settings) {
             return exts.includes(extMatch);
         });
 
-        if (extRule?.folder) return sanitizeFolder(extRule.folder);
+        if (extRule?.folder) {
+            const folder = sanitizeFolder(extRule.folder);
+            console.log('マッチ   : 拡張子ルール', `拡張子=".${extMatch}"`);
+            console.log('保存先   :', folder);
+            console.groupEnd();
+            return folder;
+        }
     }
 
+    console.log('マッチ   : なし → デフォルト保存先');
+    console.groupEnd();
     return '';
 }
 
