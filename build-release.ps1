@@ -8,14 +8,12 @@ param(
 
     [switch]$NoVerify,
 
-    # ZIP作成のみ行い、git操作（コミット・タグ・プッシュ）をスキップする
     [switch]$NoPush
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# バージョン形式の検証（Major.Minor.Patch 形式）
 if ($Version -notmatch '^\d+\.\d+\.\d+$') {
     throw "Invalid version format '$Version'. Expected Major.Minor.Patch (e.g. 1.0.3)"
 }
@@ -35,14 +33,12 @@ if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) {
     throw "LICENSE was not found: $licensePath"
 }
 
-# manifest.json のバージョンを引数で上書き
 $manifestRaw = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
 $manifest = $manifestRaw | ConvertFrom-Json
 $oldVersion = [string]$manifest.version
 
 if ($oldVersion -ne $Version) {
     Write-Output "Updating manifest version: $oldVersion -> $Version"
-    # JSON文字列内の "version": "x.x.x" を直接置換（整形を保持するため）
     $manifestRaw = $manifestRaw -replace '"version"\s*:\s*"[^"]*"', "`"version`": `"$Version`""
     [System.IO.File]::WriteAllText($manifestPath, $manifestRaw, [System.Text.Encoding]::UTF8)
     $manifest = $manifestRaw | ConvertFrom-Json
@@ -111,7 +107,7 @@ function Test-ManifestResourcePaths {
 
     foreach ($resourcePath in $ResourcePaths) {
         if ([System.IO.Path]::IsPathRooted($resourcePath) -or
-            $resourcePath -match '(^|[\\/])\.\.([\/]|$)') {
+            $resourcePath -match '(^|[\\/])\.\.([\\/]|$)') {
             throw "Manifest resource path must be relative and must not contain '..': $resourcePath"
         }
 
@@ -160,7 +156,6 @@ if (-not [string]::IsNullOrWhiteSpace($defaultLocale)) {
 
 Test-ManifestResourcePaths -ExtensionDirectory $extensionDirectory -ResourcePaths $manifestResourcePaths
 
-# 拡張機能名のハイフン変換（アンダースコア → ハイフン、出力ファイル名用）
 $extensionSlug = $ExtensionName -replace '_', '-'
 $tagName = "${ExtensionName}-v${Version}"
 $outputPath = Join-Path $repositoryRoot ("{0}-{1}.zip" -f $extensionSlug, $Version)
@@ -215,7 +210,6 @@ try {
     Write-Output "Version: $Version"
     Write-Output "Size: $((Get-Item -LiteralPath $outputPath).Length) bytes"
 
-    # git コミット・タグ・プッシュ
     if (-not $NoPush) {
         Push-Location $repositoryRoot
         try {
