@@ -3,7 +3,7 @@ name: Release Chrome Extension
 on:
   push:
     tags:
-      - "v*"
+      - "*-v*"
 
 permissions:
   contents: write
@@ -16,34 +16,54 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Read manifest version
-        id: version
-        shell: pwsh
-        run: |
-          $manifest = Get-Content .\dl_shiwake\manifest.json -Raw -Encoding UTF8 | ConvertFrom-Json
-          "version=$($manifest.version)" >> $env:GITHUB_OUTPUT
-
-      - name: Check tag and manifest version
+      - name: Parse tag
+        id: tag
         shell: pwsh
         env:
-          MANIFEST_VERSION: ${{ steps.version.outputs.version }}
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          if ($env:TAG_NAME -ne "v$($env:MANIFEST_VERSION)") {
-            throw "Tag $env:TAG_NAME does not match manifest version $env:MANIFEST_VERSION"
+          # タグ形式: {ExtensionName}-v{Version} (例: dl_shiwake-v1.0.3)
+          if ($env:TAG_NAME -notmatch '^(.+)-v(\d+\.\d+\.\d+)$') {
+            throw "Tag format is invalid: $env:TAG_NAME (expected: {name}-v{version})"
+          }
+          $extensionName = $Matches[1]
+          $version = $Matches[2]
+          "extension_name=$extensionName" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "extension_slug=$($extensionName -replace '_', '-')" >> $env:GITHUB_OUTPUT
+
+      - name: Check manifest version
+        shell: pwsh
+        env:
+          EXTENSION_NAME: ${{ steps.tag.outputs.extension_name }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          $manifestPath = ".\$env:EXTENSION_NAME\manifest.json"
+          if (-not (Test-Path $manifestPath)) {
+            throw "manifest.json was not found: $manifestPath"
+          }
+          $manifest = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($manifest.version -ne $env:VERSION) {
+            throw "Tag version v$env:VERSION does not match manifest version $($manifest.version)"
           }
 
       - name: Create release ZIP
         shell: pwsh
-        run: .\build-release.ps1
+        env:
+          EXTENSION_NAME: ${{ steps.tag.outputs.extension_name }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: .\build-release.ps1 -ExtensionName $env:EXTENSION_NAME -Version $env:VERSION -NoPush
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
+          EXTENSION_NAME: ${{ steps.tag.outputs.extension_name }}
+          EXTENSION_SLUG: ${{ steps.tag.outputs.extension_slug }}
+          VERSION: ${{ steps.tag.outputs.version }}
         shell: pwsh
         run: |
-          gh release create "v$env:VERSION" `
-            "dl-shiwake-$env:VERSION.zip" `
-            --title "ダウンロード先振り分け v$env:VERSION" `
+          $extensionTitle = (Get-Content ".\$env:EXTENSION_NAME\manifest.json" -Raw -Encoding UTF8 | ConvertFrom-Json).name
+          gh release create "$env:EXTENSION_NAME-v$env:VERSION" `
+            "$env:EXTENSION_SLUG-$env:VERSION.zip" `
+            --title "$extensionTitle v$env:VERSION" `
             --generate-notes

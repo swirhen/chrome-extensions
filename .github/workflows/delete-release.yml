@@ -6,7 +6,7 @@ on:
       tag:
         description: 削除するタグ
         required: true
-        default: v1.0.3
+        default: dl_shiwake-v1.0.3
       confirm:
         description: 削除確認のため DELETE と入力
         required: true

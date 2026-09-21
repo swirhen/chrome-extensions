@@ -1,16 +1,33 @@
 [CmdletBinding()]
 param(
-    [switch]$NoVerify
+    [Parameter(Mandatory = $true, Position = 0)]
+    [string]$ExtensionName,
+
+    [Parameter(Mandatory = $true, Position = 1)]
+    [string]$Version,
+
+    [switch]$NoVerify,
+
+    # ZIP作成のみ行い、git操作（コミット・タグ・プッシュ）をスキップする
+    [switch]$NoPush
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# バージョン形式の検証（Major.Minor.Patch 形式）
+if ($Version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "Invalid version format '$Version'. Expected Major.Minor.Patch (e.g. 1.0.3)"
+}
+
 $repositoryRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$extensionDirectory = Join-Path $repositoryRoot 'dl_shiwake'
+$extensionDirectory = Join-Path $repositoryRoot $ExtensionName
 $manifestPath = Join-Path $extensionDirectory 'manifest.json'
 $licensePath = Join-Path $repositoryRoot 'LICENSE'
 
+if (-not (Test-Path -LiteralPath $extensionDirectory -PathType Container)) {
+    throw "Extension directory was not found: $extensionDirectory"
+}
 if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
     throw "manifest.json was not found: $manifestPath"
 }
@@ -18,7 +35,21 @@ if (-not (Test-Path -LiteralPath $licensePath -PathType Leaf)) {
     throw "LICENSE was not found: $licensePath"
 }
 
-$manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+# manifest.json のバージョンを引数で上書き
+$manifestRaw = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
+$manifest = $manifestRaw | ConvertFrom-Json
+$oldVersion = [string]$manifest.version
+
+if ($oldVersion -ne $Version) {
+    Write-Output "Updating manifest version: $oldVersion -> $Version"
+    # JSON文字列内の "version": "x.x.x" を直接置換（整形を保持するため）
+    $manifestRaw = $manifestRaw -replace '"version"\s*:\s*"[^"]*"', "`"version`": `"$Version`""
+    [System.IO.File]::WriteAllText($manifestPath, $manifestRaw, [System.Text.Encoding]::UTF8)
+    $manifest = $manifestRaw | ConvertFrom-Json
+} else {
+    Write-Output "Manifest version is already $Version"
+}
+
 if ([string]::IsNullOrWhiteSpace($manifest.version)) {
     throw 'The manifest version is missing.'
 }
@@ -80,7 +111,7 @@ function Test-ManifestResourcePaths {
 
     foreach ($resourcePath in $ResourcePaths) {
         if ([System.IO.Path]::IsPathRooted($resourcePath) -or
-            $resourcePath -match '(^|[\\/])\.\.([\\/]|$)') {
+            $resourcePath -match '(^|[\\/])\.\.([\/]|$)') {
             throw "Manifest resource path must be relative and must not contain '..': $resourcePath"
         }
 
@@ -129,10 +160,12 @@ if (-not [string]::IsNullOrWhiteSpace($defaultLocale)) {
 
 Test-ManifestResourcePaths -ExtensionDirectory $extensionDirectory -ResourcePaths $manifestResourcePaths
 
-$version = [string]$manifest.version
-$outputPath = Join-Path $repositoryRoot ("dl-shiwake-{0}.zip" -f $version)
-$stagingDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("dl-shiwake-release-{0}" -f ([guid]::NewGuid().ToString('N')))
-$existingArchives = Get-ChildItem -LiteralPath $repositoryRoot -Filter 'dl-shiwake-*.zip' -File
+# 拡張機能名のハイフン変換（アンダースコア → ハイフン、出力ファイル名用）
+$extensionSlug = $ExtensionName -replace '_', '-'
+$tagName = "${ExtensionName}-v${Version}"
+$outputPath = Join-Path $repositoryRoot ("{0}-{1}.zip" -f $extensionSlug, $Version)
+$stagingDirectory = Join-Path ([System.IO.Path]::GetTempPath()) ("{0}-release-{1}" -f $ExtensionName, ([guid]::NewGuid().ToString('N')))
+$existingArchives = Get-ChildItem -LiteralPath $repositoryRoot -Filter "${extensionSlug}-*.zip" -File
 
 try {
     foreach ($archive in $existingArchives) {
@@ -179,8 +212,29 @@ try {
     }
 
     Write-Output "Created: $outputPath"
-    Write-Output "Version: $version"
+    Write-Output "Version: $Version"
     Write-Output "Size: $((Get-Item -LiteralPath $outputPath).Length) bytes"
+
+    # git コミット・タグ・プッシュ
+    if (-not $NoPush) {
+        Push-Location $repositoryRoot
+        try {
+            git add "$ExtensionName/manifest.json"
+            $status = git status --porcelain
+            if ($status) {
+                git commit -m "release: $ExtensionName v$Version"
+            } else {
+                Write-Output "No changes to manifest.json, skipping commit."
+            }
+            git tag $tagName
+            git push origin HEAD
+            git push origin $tagName
+            Write-Output "Tag pushed: $tagName"
+        }
+        finally {
+            Pop-Location
+        }
+    }
 }
 finally {
     if (Test-Path -LiteralPath $stagingDirectory) {
