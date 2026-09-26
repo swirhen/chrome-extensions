@@ -55,6 +55,7 @@ function restoreOptions() {
 
 function renderDomainRules() {
     domainList.innerHTML = '';
+    const total = currentSettings.domainRules.length;
     currentSettings.domainRules.forEach((rule, index) => {
         const tr = document.createElement('tr');
 
@@ -67,6 +68,22 @@ function renderDomainRules() {
         const tdAction = document.createElement('td');
         tdAction.className = 'action-cell';
 
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '↑';
+        upBtn.title = '上へ移動';
+        upBtn.className = 'move-btn';
+        upBtn.disabled = index === 0;
+        upBtn.style.marginRight = '3px';
+        upBtn.onclick = () => moveDomainRule(index, -1);
+
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '↓';
+        downBtn.title = '下へ移動';
+        downBtn.className = 'move-btn';
+        downBtn.disabled = index === total - 1;
+        downBtn.style.marginRight = '8px';
+        downBtn.onclick = () => moveDomainRule(index, 1);
+
         const editBtn = document.createElement('button');
         editBtn.textContent = '編集';
         editBtn.style.marginRight = '5px';
@@ -77,6 +94,8 @@ function renderDomainRules() {
         deleteBtn.className = 'delete';
         deleteBtn.onclick = () => removeDomainRule(index);
 
+        tdAction.appendChild(upBtn);
+        tdAction.appendChild(downBtn);
         tdAction.appendChild(editBtn);
         tdAction.appendChild(deleteBtn);
 
@@ -85,6 +104,25 @@ function renderDomainRules() {
         tr.appendChild(tdAction);
 
         domainList.appendChild(tr);
+    });
+}
+
+function moveDomainRule(index, direction) {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= currentSettings.domainRules.length) return;
+
+    const [item] = currentSettings.domainRules.splice(index, 1);
+    currentSettings.domainRules.splice(targetIndex, 0, item);
+
+    const currentEditIndex = parseInt(editDomainIndexInput.value, 10);
+    if (currentEditIndex === index) {
+        editDomainIndexInput.value = targetIndex;
+    } else if (currentEditIndex === targetIndex) {
+        editDomainIndexInput.value = index;
+    }
+
+    saveAllSettings(() => {
+        renderDomainRules();
     });
 }
 
@@ -141,6 +179,7 @@ function removeDomainRule(index) {
 
 function renderExtensionRules() {
     extensionList.innerHTML = '';
+    const total = currentSettings.extensionRules.length;
     currentSettings.extensionRules.forEach((rule, index) => {
         const tr = document.createElement('tr');
 
@@ -153,6 +192,22 @@ function renderExtensionRules() {
         const tdAction = document.createElement('td');
         tdAction.className = 'action-cell';
 
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '↑';
+        upBtn.title = '上へ移動';
+        upBtn.className = 'move-btn';
+        upBtn.disabled = index === 0;
+        upBtn.style.marginRight = '3px';
+        upBtn.onclick = () => moveExtensionRule(index, -1);
+
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '↓';
+        downBtn.title = '下へ移動';
+        downBtn.className = 'move-btn';
+        downBtn.disabled = index === total - 1;
+        downBtn.style.marginRight = '8px';
+        downBtn.onclick = () => moveExtensionRule(index, 1);
+
         const editBtn = document.createElement('button');
         editBtn.textContent = '編集';
         editBtn.style.marginRight = '5px';
@@ -163,6 +218,8 @@ function renderExtensionRules() {
         deleteBtn.className = 'delete';
         deleteBtn.onclick = () => removeExtensionRule(index);
 
+        tdAction.appendChild(upBtn);
+        tdAction.appendChild(downBtn);
         tdAction.appendChild(editBtn);
         tdAction.appendChild(deleteBtn);
 
@@ -171,6 +228,25 @@ function renderExtensionRules() {
         tr.appendChild(tdAction);
 
         extensionList.appendChild(tr);
+    });
+}
+
+function moveExtensionRule(index, direction) {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= currentSettings.extensionRules.length) return;
+
+    const [item] = currentSettings.extensionRules.splice(index, 1);
+    currentSettings.extensionRules.splice(targetIndex, 0, item);
+
+    const currentEditIndex = parseInt(editExtIndexInput.value, 10);
+    if (currentEditIndex === index) {
+        editExtIndexInput.value = targetIndex;
+    } else if (currentEditIndex === targetIndex) {
+        editExtIndexInput.value = index;
+    }
+
+    saveAllSettings(() => {
+        renderExtensionRules();
     });
 }
 

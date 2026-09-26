@@ -120,6 +120,26 @@
             white-space: nowrap;
         }
 
+        .action-cell button {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        button.move-btn {
+            background-color: #6c757d;
+            padding: 6px 8px;
+        }
+
+        button.move-btn:hover:not(:disabled) {
+            background-color: #545b62;
+        }
+
+        button.move-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
         .row-inputs {
             display: flex;
             gap: 10px;
@@ -168,14 +188,16 @@
     <!-- URL別振り分け設定 -->
     <div class="card">
         <h2>サイト別（URL）振り分け設定</h2>
-        <p>URL（または参照元URL）にキーワードが含まれる場合、指定フォルダに保存します。</p>
+        <p>URL（または参照元URL）にキーワードが含まれる場合、指定フォルダに保存します。<br>
+            上から順に照合され、最初に合致したルールが適用されます。
+        </p>
 
         <table id="domain-list">
             <thead>
                 <tr>
                     <th>URL（部分一致）</th>
                     <th>保存フォルダ名 (例: Twitter)</th>
-                    <th style="width: 120px;">操作</th>
+                    <th style="width: 180px;">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -210,7 +232,7 @@
                 <tr>
                     <th>拡張子（完全一致）</th>
                     <th>保存フォルダ名 (例: Images)</th>
-                    <th style="width: 120px;">操作</th>
+                    <th style="width: 180px;">操作</th>
                 </tr>
             </thead>
             <tbody>
