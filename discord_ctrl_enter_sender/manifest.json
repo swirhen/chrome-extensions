@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "version": "1.1",
-  "name": "Send with Ctrl+Enter in Discord / Muse / Claude / Gemini / ChatGPT",
+  "name": "Send with Ctrl+Enter in Discord / Muse / Claude / Gemini",
   "content_scripts": [
     {
       "matches": [
@@ -10,8 +10,7 @@
         "https://*.muse.ai/*",
         "https://claude.ai/*",
         "https://*.claude.ai/*",
-        "https://gemini.google.com/*",
-        "https://chatgpt.com/*"
+        "https://gemini.google.com/*"
       ],
       "js": [
         "script.js"
